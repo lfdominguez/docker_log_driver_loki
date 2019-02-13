@@ -1,5 +1,7 @@
 FROM golang:1.10-alpine
 
+RUN apk --no-cach update && apk add git
+
 RUN mkdir -p /go/src/github.com/lfdominguez/docker_log_driver_loki
 WORKDIR /go/src/github.com/lfdominguez/docker_log_driver_loki
 COPY . /go/src/github.com/lfdominguez/docker_log_driver_loki

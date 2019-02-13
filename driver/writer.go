@@ -83,7 +83,7 @@ func logMessageToLoki(lp *logPair, message []byte) error {
 	
 	url := "http://192.168.0.159/api/prom/push"
 
-	req, err := http.NewRequest("POST", url, bytes.NewBuffer(bytesToSend))
+	req, _ := http.NewRequest("POST", url, bytes.NewBuffer(bytesToSend))
 	
     req.Header.Set("Content-Type", "application/json")
 

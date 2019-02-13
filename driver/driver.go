@@ -18,7 +18,7 @@ import (
 	"github.com/tonistiigi/fifo"
 )
 
-type driver struct {
+type Driver struct {
 	mu     sync.Mutex
 	logs   map[string]*logPair
 }
@@ -31,13 +31,13 @@ type logPair struct {
 	stream  io.ReadCloser
 }
 
-func newDriver() *driver {
-	return &driver{
+func NewDriver() *Driver {
+	return &Driver{
 		logs: make(map[string]*logPair),
 	}
 }
 
-func (d *driver) StartLogging(file string, logCtx logger.Info) error {
+func (d *Driver) StartLogging(file string, logCtx logger.Info) error {
 	d.mu.Lock()
 	if _, exists := d.logs[path.Base(file)]; exists {
 		d.mu.Unlock()
@@ -91,7 +91,7 @@ func (d *driver) StartLogging(file string, logCtx logger.Info) error {
 	return nil
 }
 
-func (d *driver) StopLogging(file string) error {
+func (d *Driver) StopLogging(file string) error {
 	logrus.WithField("file", file).Info("Stop logging")
 	d.mu.Lock()
 	lp, ok := d.logs[path.Base(file)]
@@ -142,6 +142,6 @@ func consumeLog(lp *logPair) {
 	}
 }
 
-func (d *driver) ReadLogs(info logger.Info, config logger.ReadConfig) (io.ReadCloser, error) {
+func (d *Driver) ReadLogs(info logger.Info, config logger.ReadConfig) (io.ReadCloser, error) {
 	return nil, nil
 }

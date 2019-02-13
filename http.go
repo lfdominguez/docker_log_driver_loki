@@ -6,6 +6,8 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/lfdominguez/docker_log_driver_loki/driver"
+
 	"github.com/docker/docker/daemon/logger"
 	"github.com/docker/docker/pkg/ioutils"
 	"github.com/docker/go-plugins-helpers/sdk"
@@ -30,7 +32,7 @@ type ReadLogsRequest struct {
 	Config logger.ReadConfig
 }
 
-func handlers(h *sdk.Handler, d *driver) {
+func handlers(h *sdk.Handler, d *driver.Driver) {
 	h.HandleFunc("/LogDriver.StartLogging", func(w http.ResponseWriter, r *http.Request) {
 		var req StartLoggingRequest
 		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {

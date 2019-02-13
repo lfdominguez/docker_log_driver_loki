@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/lfdominguez/docker_log_driver_loki/driver"
+
 	"github.com/Sirupsen/logrus"
 	"github.com/docker/go-plugins-helpers/sdk"
 )
@@ -29,7 +31,7 @@ func main() {
 	}
 
 	h := sdk.NewHandler(`{"Implements": ["LoggingDriver"]}`)
-	handlers(&h, newDriver())
+	handlers(&h, driver.NewDriver())
 	if err := h.ServeUnix("loki", 0); err != nil {
 		panic(err)
 	}

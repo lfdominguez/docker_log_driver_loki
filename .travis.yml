@@ -1,0 +1,49 @@
+sudo: required
+
+language: go
+
+go:
+  - 1.x
+
+git:
+  depth: 1
+
+env:
+  global:
+    - UPXVER="3.95"
+
+install:
+  - go get -d -v ./...
+  - echo "Installing upx .."
+  - "{ [ -f upx/${UPXVER}/upx ]; } ||
+      { curl -OL https://github.com/upx/upx/releases/download/v${UPXVER}/upx-${UPXVER}-amd64_linux.tar.xz;
+        tar xvf upx-${UPXVER}-amd64_linux.tar.xz;
+        mkdir -p upx;
+        mv upx-${UPXVER}-amd64_linux upx/${UPXVER};
+      }"
+  - export PATH="${TRAVIS_BUILD_DIR}/upx/${UPXVER}/:${PATH}"
+
+script:
+  - go get github.com/mitchellh/gox
+  - GOOS=windows go get -d -v ./...
+  - gox -verbose -output docker-log-loki-{{.OS}}-{{.Arch}} -os "linux freebsd windows" -arch "amd64 386 arm arm64" -ldflags "-s -w -X main.Version=${TRAVIS_TAG} -X main.buildTime=`date -u '+%Y-%m-%d_%I:%M:%S%p'` -X main.commitId=${TRAVIS_COMMIT}"
+  - upx docker-log-loki-linux-*
+  - upx docker-log-loki-windows-*
+
+deploy:
+  provider: releases
+  api_key:
+    secure: "iZgNor2OZkiIE7BaupurNoLCIXRvmZGWJCSRqmvs1tFWK0qF8PYXLISVnwEiy4r+5RETfLKKYXj/gvg1GXxMZXyvGamNviciUllT40vFpHK9mRD+BpgX8zwIZ95wec8lPVPn/dr83ijtL51Rn/P6UDQBHP6fH3JzCp29uSE2/S48BLduKyJo2u7MM6+J2NOz2iNN+6cUItbrJGAQ8v5Z5q9tFyMRi57JmfD/Kz3nkkqxzrGeRcVBJTg0Vqq2qOoIAdTO3RD0N8OwxYUKEHo7OM76FsR6cVNgF62VkUlgC1Gj0Axl7lrLi1/sIAO68KJyPRgHc2fNPqWMSAX9bmZDNFcpYElEyVDQjvaPf7qCB7b5YAMfpCJD1CV7nhqX7257opfsc1foejppg7OotZJuUkYRF08vjsthgXG447DY/ID+HhwOhBpSUTqcxZJGmUf5UntFAow19MA7p4b/jSBSybKAgflDvlzmWjYuuidN3UyVyZFMjwuGM4+a5iFKkzq6rQ0c4ue/Ejyd0jZo87L01g26agz+2GLr+CtQSwvL5EBC/Oq1yEzFEa17b+GuDlVgIhyL5Ad7HHJigSxy3hY1dh7D/HEIlx72INiTIggRdydQQ2o/jaJDlo70wZAiXu7i/00MOqmfa4wknjLON5qPJIFOthpMxBv1lu+698Yfvb4="
+  skip_cleanup: true
+  file:
+    - docker-log-loki-linux-amd64
+    - docker-log-loki-linux-386
+    - docker-log-loki-linux-arm
+    - docker-log-loki-linux-arm64
+    - docker-log-loki-freebsd-amd64
+    - docker-log-loki-freebsd-386
+    - docker-log-loki-windows-amd64.exe
+    - docker-log-loki-windows-386.exe
+  on:
+    repo: lfdominguez/docker_log_driver_loki
+    tags: true

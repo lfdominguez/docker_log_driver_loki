@@ -26,7 +26,7 @@ install:
 script:
   - go get github.com/mitchellh/gox
   - GOOS=windows go get -d -v ./...
-  - gox -verbose -output docker-log-loki-{{.OS}}-{{.Arch}} -os "linux windows" -arch "amd64 386 arm arm64" -ldflags "-s -w -X main.Version=${TRAVIS_TAG} -X main.buildTime=`date -u '+%Y-%m-%d_%I:%M:%S%p'` -X main.commitId=${TRAVIS_COMMIT}"
+  - gox -verbose -output docker-log-loki-{{.OS}}-{{.Arch}} -os "linux" -arch "amd64 386 arm arm64" -ldflags "-s -w -X main.Version=${TRAVIS_TAG} -X main.buildTime=`date -u '+%Y-%m-%d_%I:%M:%S%p'` -X main.commitId=${TRAVIS_COMMIT}"
   - upx docker-log-loki-linux-*
 
 deploy:

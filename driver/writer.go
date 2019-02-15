@@ -13,30 +13,30 @@ import (
 )
 
 type lokiMsg struct {
-	streams []lokiStream
+	Streams []lokiStream `json:"streams"`
 }
 
 type lokiStream struct {
-	labels []map[string]interface{}
-	entries []lokiEntry
+	Labels []map[string]interface{} `json:"labels"`
+	Entries []lokiEntry             `json:"entries"`
 }
 
 type lokiEntry struct {
-	ts string
-	line map[string]string
+	Ts string                     `json:"ts"`
+	Line map[string]interface{}   `json:"line"`
 }
 
-func extractMetadata(finalServiceName string, message []byte) map[string]string {
+func extractMetadata(finalServiceName string, message []byte) map[string]interface{} {
 
 	logrus.WithField("service_name", finalServiceName).Debug("searching for extractor")
 
-	metadata := map[string]string{}
+	metadata := map[string]interface{}{}
 
 	if bridge, err := bridge.New(finalServiceName); err == nil {
 		metadata = bridge.Extract(message)
 	} else {
 		logrus.WithField("service_name", finalServiceName).Debug("extractor not found")
-		metadata = map[string]string{
+		metadata = map[string]interface{}{
 			"msg": string(message),
 		}
 	}
@@ -57,7 +57,7 @@ func logMessageToLoki(lp *logPair, message []byte) error {
 	lp.logLine.Timestamp = time.Now()
 
 	if metadata["time"] != "" {
-		if parsedTime, err := time.Parse(time.RFC3339, metadata["time"]); err != nil {
+		if parsedTime, err := time.Parse(time.RFC3339, metadata["time"].(string)); err != nil {
 			lp.logLine.Timestamp = parsedTime
 		}
 
@@ -65,17 +65,17 @@ func logMessageToLoki(lp *logPair, message []byte) error {
 	}
 
 	entryToSend := lokiEntry {
-		ts: lp.logLine.Timestamp.Format(time.RFC3339),
-		line: metadata,
+		Ts: lp.logLine.Timestamp.Format(time.RFC3339),
+		Line: metadata,
 	}
 
 	streamToSend := lokiStream {
-		labels: []map[string]interface{}{structs.Map(lp.logLine)},
-		entries: []lokiEntry{entryToSend},
+		Labels: []map[string]interface{}{structs.Map(lp.logLine)},
+		Entries: []lokiEntry{entryToSend},
 	}
 
 	lokiToSend := lokiMsg {
-		streams: []lokiStream{streamToSend},
+		Streams: []lokiStream{streamToSend},
 	}
 
 	bytesToSend, err := json.Marshal(lokiToSend)

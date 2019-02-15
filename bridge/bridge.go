@@ -21,6 +21,6 @@ func New(serviceName string) (*Bridge, error) {
 	}, nil
 }
 
-func (b *Bridge) Extract(message []byte) map[string]string {
+func (b *Bridge) Extract(message []byte) map[string]interface{} {
 	return b.registry.Extract(message)
 }

@@ -1,22 +1,22 @@
 {
-    "description": "Loki log driver",
-    "documentation": "-",
-    "entrypoint": ["/docker-loki-log-driver"],
-    "network": {
-      "type": "host"
+    "Description": "Loki log driver",
+    "Documentation": "-",
+    "Entrypoint": ["/docker-loki-log-driver"],
+    "Network": {
+      "Type": "host"
     },
-    "interface": {
-      "types": [
+    "Interface": {
+      "Types": [
         "docker.logdriver/1.0"
       ],
-      "socket": "log.sock"
+      "Socket": "log-loki.sock"
     },
-      "env": [
-          {
-              "name": "LOG_LEVEL",
-              "description": "Set log level to output for plugin logs",
-              "value": "info",
-              "settable": ["value"]
-          }
-      ]
+    "Env": [
+        {
+            "Name": "LOG_LEVEL",
+            "Description": "Set log level to output for plugin logs",
+            "Value": "info",
+            "Settable": ["value"]
+        }
+    ]
   }

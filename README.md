@@ -11,4 +11,4 @@ This project allow to send all Docker Logs to Grafana Loki Server.
 
 ## How to use
 
-First you need configure squid to allow the requests to cache manager and later execute the exporter.
+TODO...

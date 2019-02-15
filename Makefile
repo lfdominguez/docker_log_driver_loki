@@ -9,7 +9,7 @@ clean:
 	rm -rf ./plugin
 
 docker:
-	@echo "### docker build: rootfs image with logzio-logging-plugin"
+	@echo "### docker build: rootfs image with ${PLUGIN_NAME}"
 	docker build -t ${PLUGIN_NAME}:rootfs .
 
 rootfs:

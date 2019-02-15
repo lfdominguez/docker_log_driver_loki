@@ -30,11 +30,11 @@ func extractMetadata(finalServiceName string, message []byte) map[string]string 
 
 	logrus.WithField("service_name", finalServiceName).Debug("searching for extractor")
 
-	bridge, err := extractors.New(finalServiceName)
+	metadata := map[string]string{}
 
-	metadata := bridge.Extract(message)
-
-	if err != nil {
+	if bridge, err := extractors.New(finalServiceName); err == nil {
+		metadata = bridge.Extract(message)
+	} else {
 		logrus.WithField("service_name", finalServiceName).Debug("extractor not found")
 		metadata = map[string]string{
 			"msg": string(message),

@@ -60,7 +60,7 @@ func handlers(h *sdk.Handler, d *driver.Driver) {
 
 	h.HandleFunc("/LogDriver.Capabilities", func(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(&CapabilitiesResponse{
-			Cap: logger.Capability{ReadLogs: true},
+			Cap: logger.Capability{ReadLogs: false},
 		})
 	})
 

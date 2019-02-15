@@ -8,7 +8,7 @@ import (
 	"strings"
 
 	"github.com/Sirupsen/logrus"
-	"github.com/lfdominguez/docker_log_driver_loki/extractors"
+	"github.com/lfdominguez/docker_log_driver_loki/bridge"
 	"github.com/fatih/structs"
 )
 
@@ -32,7 +32,7 @@ func extractMetadata(finalServiceName string, message []byte) map[string]string 
 
 	metadata := map[string]string{}
 
-	if bridge, err := extractors.New(finalServiceName); err == nil {
+	if bridge, err := bridge.New(finalServiceName); err == nil {
 		metadata = bridge.Extract(message)
 	} else {
 		logrus.WithField("service_name", finalServiceName).Debug("extractor not found")

@@ -1,4 +1,4 @@
-package extractors
+package bridge
 
 import (
 	"sync"
@@ -22,5 +22,5 @@ func New(serviceName string) (*Bridge, error) {
 }
 
 func (b *Bridge) Extract(message []byte) map[string]string {
-	return b.registry.extract(message)
+	return b.registry.Extract(message)
 }

@@ -1,7 +1,7 @@
-package extractors
+package bridge
 
 type ExtractorAdapter interface {
-	extract(message []byte) map[string]string
+	Extract(message []byte) map[string]string
 }
 
 type AdapterFactory interface {

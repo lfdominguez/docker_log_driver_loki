@@ -1,4 +1,4 @@
-package extractors
+package bridge
 
 import (
 	"reflect"

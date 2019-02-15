@@ -56,7 +56,7 @@ func logMessageToLoki(lp *logPair, message []byte) error {
 
 	lp.logLine.Timestamp = time.Now()
 
-	if metadata["time"] != "" {
+	if metadata["time"] != nil {
 		if parsedTime, err := time.Parse(time.RFC3339, metadata["time"].(string)); err != nil {
 			lp.logLine.Timestamp = parsedTime
 		}

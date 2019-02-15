@@ -10,6 +10,8 @@ import (
 	"github.com/docker/go-plugins-helpers/sdk"
 )
 
+const socketName = "/run/docker/plugins/logloki.sock"
+
 var logLevels = map[string]logrus.Level{
 	"debug": logrus.DebugLevel,
 	"info":  logrus.InfoLevel,
@@ -32,7 +34,7 @@ func main() {
 
 	h := sdk.NewHandler(`{"Implements": ["LoggingDriver"]}`)
 	handlers(&h, driver.NewDriver())
-	if err := h.ServeUnix("loki", 0); err != nil {
+	if err := h.ServeUnix(socketName, 0); err != nil {
 		panic(err)
 	}
 }

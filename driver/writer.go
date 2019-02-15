@@ -17,7 +17,7 @@ type lokiMsg struct {
 }
 
 type lokiStream struct {
-	Labels []map[string]interface{} `json:"labels"`
+	Labels map[string]interface{} `json:"labels"`
 	Entries []lokiEntry             `json:"entries"`
 }
 
@@ -70,7 +70,7 @@ func logMessageToLoki(lp *logPair, message []byte) error {
 	}
 
 	streamToSend := lokiStream {
-		Labels: []map[string]interface{}{structs.Map(lp.logLine)},
+		Labels: structs.Map(lp.logLine),
 		Entries: []lokiEntry{entryToSend},
 	}
 

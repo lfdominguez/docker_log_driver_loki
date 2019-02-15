@@ -11,7 +11,6 @@ type jsonTime struct {
 type jsonLogLine struct {
 	ContainerId      string            `json:"container_id"`
 	ContainerName    string            `json:"container_name"`
-	ContainerCreated jsonTime          `json:"container_created"`
 	StackName        string            `json:"stack_name"`
 	ServiceName      string            `json:"service_name"`
 	ImageId          string            `json:"image_id"`

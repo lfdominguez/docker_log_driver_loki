@@ -3,6 +3,7 @@ PLUGIN_NAME=lfdominguez/docker-log-driver-loki
 PLUGIN_TAG=latest
 
 all: clean docker rootfs create
+all-hub: clean rootfs-hub create enable
 
 clean:
 	@echo "### rm ./plugin"
@@ -20,6 +21,18 @@ rootfs:
 	@echo "### copy config.json to ./plugin/"
 	cp config.json ./plugin/
 	docker rm -vf tmprootfs
+
+rootfs-hub:
+	@echo "### Download image from Hub"
+	docker pull ${PLUGIN_NAME}:${PLUGIN_TAG}
+
+	@echo "### create rootfs directory in ./plugin/rootfs"
+	mkdir -p ./plugin/rootfs
+	docker create --name tmprootfs ${PLUGIN_NAME}:${PLUGIN_TAG}
+	docker export tmprootfs | tar -x -C ./plugin/rootfs
+	@echo "### copy config.json to ./plugin/"
+	cp config.json ./plugin/
+	docker rm -vf tmprootfs	
 
 create:
 	@echo "### remove existing plugin ${PLUGIN_NAME}:${PLUGIN_TAG} if exists"

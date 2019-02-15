@@ -18,6 +18,12 @@ import (
 	"github.com/tonistiigi/fifo"
 )
 
+const (
+	//log-opt
+	lokihost    = "loki-host"
+	lokiport    = "loki-port"
+)
+
 type Driver struct {
 	mu     sync.Mutex
 	logs   map[string]*logPair
@@ -29,6 +35,29 @@ type logPair struct {
 	info    logger.Info
 	logLine jsonLogLine
 	stream  io.ReadCloser
+}
+
+func validateDriverOpt(loggerInfo logger.Info) error {
+	config := loggerInfo.Config
+
+	for opt := range config {
+		switch opt {
+		case lokihost, lokiport:
+		default:
+			return fmt.Errorf("wrong log-opt: '%s' - %s\n", opt, loggerInfo.ContainerID)
+		}
+	}
+	_, ok := config[lokihost]
+	if !ok {
+		return fmt.Errorf("Loki host is required. config: %v+\n", config)
+	}
+
+	_, ok = config[lokiport]
+	if !ok {
+		return fmt.Errorf("Loki host port is required\n")
+	}
+
+	return nil
 }
 
 func NewDriver() *Driver {
@@ -51,19 +80,24 @@ func (d *Driver) StartLogging(file string, logCtx logger.Info) error {
 		return errors.Wrapf(err, "error opening logger fifo: %q", file)
 	}
 
+	err = validateDriverOpt(logCtx)
+	if err != nil {
+		return errors.Wrap(err, "error in one of the logger options")
+	}
+
 	tag, err := loggerutils.ParseLogTag(logCtx, loggerutils.DefaultTemplate)
 	if err != nil {
-		return err
+		return errors.Wrapf(err, "error reading log tags\n")
 	}
 
 	extra, err := logCtx.ExtraAttributes(nil)
 	if err != nil {
-		return err
+		return errors.Wrapf(err, "error reading extra attributes\n")
 	}
 
 	hostname, err := logCtx.Hostname()
 	if err != nil {
-		return err
+		return errors.Wrapf(err, "error reading hostname\n")
 	}
 
 	logLine := jsonLogLine{
@@ -119,6 +153,8 @@ func consumeLog(lp *logPair) {
 	dec := protoio.NewUint32DelimitedReader(lp.stream, binary.BigEndian, 1e6)
 	defer dec.Close()
 	defer shutdownLogPair(lp)
+
+	logrus.WithField("id", lp.info.ContainerID).Debug("sending log to Loki server")
 
 	for {
 		err := dec.ReadMsg(&buf)

@@ -42,11 +42,9 @@ func (g *GrafanaAdapter) extract(message []byte) map[string]string {
 
 	ret["level"] = ret["lvl"]
 	ret["time"] = ret["t"]
-	ret["message"] = ret["msg"]
 
 	delete(ret, "t")
 	delete(ret, "lvl")
-	delete(ret, "msg")
 
 	return ret
 }

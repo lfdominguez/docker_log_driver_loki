@@ -5,7 +5,9 @@ import (
 	"encoding/json"
 	"time"
 	"net/http"
+	"strings"
 
+	"github.com/Sirupsen/logrus"
 	"github.com/lfdominguez/docker_log_driver_loki/extractors"
 	"github.com/fatih/structs"
 )
@@ -26,13 +28,20 @@ type lokiEntry struct {
 
 func extractMetadata(finalServiceName string, message []byte) map[string]string {
 
+	logrus.WithField("service_name", finalServiceName).Debug("searching for extractor")
+
 	bridge, err := extractors.New(finalServiceName)
 
+	metadata := bridge.Extract(message)
+
 	if err != nil {
-		return map[string]string{}
+		logrus.WithField("service_name", finalServiceName).Debug("extractor not found")
+		metadata = map[string]string{
+			"msg": string(message),
+		}
 	}
 
-	return bridge.Extract(message)
+	return metadata
 }
 
 func logMessageToLoki(lp *logPair, message []byte) error {
@@ -47,19 +56,12 @@ func logMessageToLoki(lp *logPair, message []byte) error {
 
 	lp.logLine.Timestamp = time.Now()
 
-	if len(metadata) != 0 {
-
-		if metadata["time"] != "" {
-			if parsedTime, err := time.Parse(time.RFC3339, metadata["time"]); err != nil {
-				lp.logLine.Timestamp = parsedTime
-			}
-
-			delete(metadata, "time")
+	if metadata["time"] != "" {
+		if parsedTime, err := time.Parse(time.RFC3339, metadata["time"]); err != nil {
+			lp.logLine.Timestamp = parsedTime
 		}
-	}
 
-	if metadata["message"] == "" {
-		metadata["message"] = string(message[:])
+		delete(metadata, "time")
 	}
 
 	entryToSend := lokiEntry {
@@ -80,8 +82,16 @@ func logMessageToLoki(lp *logPair, message []byte) error {
 	if err != nil {
 		return err
 	}
+
+	var urlBuilder strings.Builder
+
+	urlBuilder.WriteString("http://")
+	urlBuilder.WriteString(lp.info.Config[lokihost])
+	urlBuilder.WriteString(":")
+	urlBuilder.WriteString(lp.info.Config[lokiport])
+	urlBuilder.WriteString("/api/prom/push")
 	
-	url := "http://192.168.0.159/api/prom/push"
+	url := urlBuilder.String()
 
 	req, _ := http.NewRequest("POST", url, bytes.NewBuffer(bytesToSend))
 	

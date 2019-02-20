@@ -21,8 +21,8 @@ type lokiStream struct {
 }
 
 type lokiEntry struct {
-	Ts   string                 `json:"ts"`
-	Line map[string]interface{} `json:"line"`
+	Ts   string `json:"ts"`
+	Line string `json:"line"`
 }
 
 func extractMetadata(finalServiceName string, message []byte) map[string]interface{} {
@@ -63,9 +63,15 @@ func logMessageToLoki(lp *logPair, message []byte) error {
 		delete(metadata, "time")
 	}
 
+	lineStr, err := json.Marshal(metadata)
+
+	if err != nil {
+		return err
+	}
+
 	entryToSend := lokiEntry{
 		Ts:   lp.logLine.Timestamp.Format(time.RFC3339),
-		Line: metadata,
+		Line: string(lineStr),
 	}
 
 	labelsStr, err := json.Marshal(lp.logLine)

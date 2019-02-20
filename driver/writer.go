@@ -3,6 +3,7 @@ package driver
 import (
 	"bytes"
 	"encoding/json"
+	"github.com/fatih/structs"
 	"net/http"
 	"strings"
 	"time"
@@ -85,14 +86,25 @@ func logMessageToLoki(lp *logPair, message []byte) error {
 		Line: "{" + strings.Join(labels, ",") + "}",
 	}
 
-	labelsStr, err := json.Marshal(lp.logLine)
+	labels = labels[:0]
 
-	if err != nil {
-		return err
+	for key, val := range structs.Map(lp.logLine) {
+		var lineStr strings.Builder
+
+		lineStr.WriteString(key)
+		lineStr.WriteString(":\"")
+
+		val = strings.Replace(val.(string), "'", "\\'", -1)
+		val = strings.Replace(val.(string), "\"", "\\\"", -1)
+		lineStr.WriteString(val.(string))
+
+		lineStr.WriteString("\"")
+
+		labels = append(labels, lineStr.String())
 	}
 
 	streamToSend := lokiStream{
-		Labels:  string(labelsStr),
+		Labels:  "{" + strings.Join(labels, ",") + "}",
 		Entries: []lokiEntry{entryToSend},
 	}
 

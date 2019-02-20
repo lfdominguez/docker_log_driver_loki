@@ -89,6 +89,10 @@ func logMessageToLoki(lp *logPair, message []byte) error {
 	labels = labels[:0]
 
 	for key, val := range structs.Map(lp.logLine) {
+		if key == "Extra" {
+			continue
+		}
+
 		var lineStr strings.Builder
 
 		lineStr.WriteString(key)

@@ -89,7 +89,7 @@ func logMessageToLoki(lp *logPair, message []byte) error {
 	labels = labels[:0]
 
 	for key, val := range structs.Map(lp.logLine) {
-		if key == "Extra" {
+		if key == "Extra" || key == "Timestamp" {
 			continue
 		}
 

@@ -70,7 +70,7 @@ func logMessageToLoki(lp *logPair, message []byte) error {
 		var lineStr strings.Builder
 
 		lineStr.WriteString(key)
-		lineStr.WriteString(":\"")
+		lineStr.WriteString("=\"")
 
 		val = strings.Replace(val.(string), "'", "\\'", -1)
 		val = strings.Replace(val.(string), "\"", "\\\"", -1)
@@ -96,7 +96,7 @@ func logMessageToLoki(lp *logPair, message []byte) error {
 		var lineStr strings.Builder
 
 		lineStr.WriteString(key)
-		lineStr.WriteString(":\"")
+		lineStr.WriteString("=\"")
 
 		val = strings.Replace(val.(string), "'", "\\'", -1)
 		val = strings.Replace(val.(string), "\"", "\\\"", -1)

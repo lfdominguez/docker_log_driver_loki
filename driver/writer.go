@@ -63,15 +63,26 @@ func logMessageToLoki(lp *logPair, message []byte) error {
 		delete(metadata, "time")
 	}
 
-	lineStr, err := json.Marshal(metadata)
+	var labels []string
 
-	if err != nil {
-		return err
+	for key, val := range metadata {
+		var lineStr strings.Builder
+
+		lineStr.WriteString(key)
+		lineStr.WriteString(":\"")
+
+		val = strings.Replace(val.(string), "'", "\\'", -1)
+		val = strings.Replace(val.(string), "\"", "\\\"", -1)
+		lineStr.WriteString(val.(string))
+
+		lineStr.WriteString("\"")
+
+		labels = append(labels, lineStr.String())
 	}
 
 	entryToSend := lokiEntry{
 		Ts:   lp.logLine.Timestamp.Format(time.RFC3339),
-		Line: string(lineStr),
+		Line: "{" + strings.Join(labels, ",") + "}",
 	}
 
 	labelsStr, err := json.Marshal(lp.logLine)

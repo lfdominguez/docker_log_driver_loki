@@ -3,13 +3,12 @@ package driver
 import (
 	"bytes"
 	"encoding/json"
-	"time"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/Sirupsen/logrus"
 	"github.com/lfdominguez/docker_log_driver_loki/bridge"
-	"github.com/fatih/structs"
 )
 
 type lokiMsg struct {
@@ -17,13 +16,13 @@ type lokiMsg struct {
 }
 
 type lokiStream struct {
-	Labels map[string]interface{} `json:"labels"`
-	Entries []lokiEntry             `json:"entries"`
+	Labels  string      `json:"labels"`
+	Entries []lokiEntry `json:"entries"`
 }
 
 type lokiEntry struct {
-	Ts string                     `json:"ts"`
-	Line map[string]interface{}   `json:"line"`
+	Ts   string                 `json:"ts"`
+	Line map[string]interface{} `json:"line"`
 }
 
 func extractMetadata(finalServiceName string, message []byte) map[string]interface{} {
@@ -32,8 +31,8 @@ func extractMetadata(finalServiceName string, message []byte) map[string]interfa
 
 	metadata := map[string]interface{}{}
 
-	if bridge, err := bridge.New(finalServiceName); err == nil {
-		metadata = bridge.Extract(message)
+	if pluginBridge, err := bridge.New(finalServiceName); err == nil {
+		metadata = pluginBridge.Extract(message)
 	} else {
 		logrus.WithField("service_name", finalServiceName).Debug("extractor not found")
 		metadata = map[string]interface{}{
@@ -64,17 +63,23 @@ func logMessageToLoki(lp *logPair, message []byte) error {
 		delete(metadata, "time")
 	}
 
-	entryToSend := lokiEntry {
-		Ts: lp.logLine.Timestamp.Format(time.RFC3339),
+	entryToSend := lokiEntry{
+		Ts:   lp.logLine.Timestamp.Format(time.RFC3339),
 		Line: metadata,
 	}
 
-	streamToSend := lokiStream {
-		Labels: structs.Map(lp.logLine),
+	labelsStr, err := json.Marshal(lp.logLine)
+
+	if err != nil {
+		return err
+	}
+
+	streamToSend := lokiStream{
+		Labels:  string(labelsStr),
 		Entries: []lokiEntry{entryToSend},
 	}
 
-	lokiToSend := lokiMsg {
+	lokiToSend := lokiMsg{
 		Streams: []lokiStream{streamToSend},
 	}
 
@@ -90,21 +95,21 @@ func logMessageToLoki(lp *logPair, message []byte) error {
 	urlBuilder.WriteString(":")
 	urlBuilder.WriteString(lp.info.Config[lokiport])
 	urlBuilder.WriteString("/api/prom/push")
-	
+
 	url := urlBuilder.String()
 
 	req, _ := http.NewRequest("POST", url, bytes.NewBuffer(bytesToSend))
-	
-    req.Header.Set("Content-Type", "application/json")
 
-    client := &http.Client{}
-	
-	resp, err := client.Do(req)	
-    if err != nil {
-        return err
+	req.Header.Set("Content-Type", "application/json")
+
+	client := &http.Client{}
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return err
 	}
-	
-    defer resp.Body.Close()
+
+	defer resp.Body.Close()
 
 	return nil
 }

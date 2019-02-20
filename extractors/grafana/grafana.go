@@ -7,16 +7,16 @@ import (
 	"github.com/lfdominguez/docker_log_driver_loki/bridge"
 )
 
-type GrafanaAdapter struct {}
+type GrafanaAdapter struct{}
 
 func init() {
 	f := new(Factory)
 	bridge.Register(f, "grafana")
 }
 
-func convert (value string) interface{} {
+func convert(value string) interface{} {
 	if b, err := strconv.ParseBool(value); err != nil {
-		return b;
+		return b
 	}
 
 	if f, err := strconv.ParseFloat(value, 64); err != nil {
@@ -31,7 +31,7 @@ func convert (value string) interface{} {
 }
 
 var (
-	logPattern = regexp.MustCompile(`([a-zA-Z])+=("([^\"]+)"|[^\ ]+)`)
+	logPattern = regexp.MustCompile(`([a-zA-Z])+=("([^"]+)"|[^ ]+)`)
 )
 
 type Factory struct{}
@@ -53,7 +53,7 @@ func (g *GrafanaAdapter) Extract(message []byte) map[string]interface{} {
 	for _, match := range matches {
 		key := match[1]
 		value := match[3]
-		
+
 		if value == "" {
 			value = match[2]
 		}

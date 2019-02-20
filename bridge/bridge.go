@@ -1,13 +1,13 @@
 package bridge
 
 import (
-	"sync"
 	"errors"
+	"sync"
 )
 
 type Bridge struct {
 	sync.Mutex
-	registry       ExtractorAdapter
+	registry ExtractorAdapter
 }
 
 func New(serviceName string) (*Bridge, error) {
@@ -17,7 +17,7 @@ func New(serviceName string) (*Bridge, error) {
 	}
 
 	return &Bridge{
-		registry:       factory.New(serviceName),
+		registry: factory.New(serviceName),
 	}, nil
 }
 

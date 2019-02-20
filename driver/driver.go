@@ -20,13 +20,13 @@ import (
 
 const (
 	//log-opt
-	lokihost    = "loki-host"
-	lokiport    = "loki-port"
+	lokihost = "loki-host"
+	lokiport = "loki-port"
 )
 
 type Driver struct {
-	mu     sync.Mutex
-	logs   map[string]*logPair
+	mu   sync.Mutex
+	logs map[string]*logPair
 }
 
 type logPair struct {
@@ -101,16 +101,16 @@ func (d *Driver) StartLogging(file string, logCtx logger.Info) error {
 	}
 
 	logLine := jsonLogLine{
-		ContainerId:      logCtx.FullID(),
-		ContainerName:    logCtx.Name(),
-		StackName:        extra["com.docker.stack.namespace"],
-		ServiceName:      extra["com.docker.swarm.service.name"],
-		ImageId:          logCtx.ImageFullID(),
-		ImageName:        logCtx.ImageName(),
-		Command:          logCtx.Command(),
-		Tag:              tag,
-		Extra:            extra,
-		Host:             hostname,
+		ContainerId:   logCtx.FullID(),
+		ContainerName: logCtx.Name(),
+		StackName:     extra["com.docker.stack.namespace"],
+		ServiceName:   extra["com.docker.swarm.service.name"],
+		ImageId:       logCtx.ImageFullID(),
+		ImageName:     logCtx.ImageName(),
+		Command:       logCtx.Command(),
+		Tag:           tag,
+		Extra:         extra,
+		Host:          hostname,
 	}
 
 	lp := &logPair{true, file, logCtx, logLine, stream}

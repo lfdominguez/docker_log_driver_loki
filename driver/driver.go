@@ -43,6 +43,10 @@ func validateDriverOpt(loggerInfo logger.Info) error {
 	for opt := range config {
 		switch opt {
 		case lokihost, lokiport:
+		case "labels":
+		case "env":
+		case "env-regex":
+		case "tag":
 		default:
 			return fmt.Errorf("wrong log-opt: '%s' - %s\n", opt, loggerInfo.ContainerID)
 		}

@@ -35,6 +35,8 @@ rootfs-hub:
 	docker rm -vf tmprootfs	
 
 create:
+	@echo "### disable existing plugin ${PLUGIN_NAME}:${PLUGIN_TAG} if exists"
+	docker plugin disable -f ${PLUGIN_NAME}:${PLUGIN_TAG} || true
 	@echo "### remove existing plugin ${PLUGIN_NAME}:${PLUGIN_TAG} if exists"
 	docker plugin rm -f ${PLUGIN_NAME}:${PLUGIN_TAG} || true
 	@echo "### create new plugin ${PLUGIN_NAME}:${PLUGIN_TAG} from ./plugin"

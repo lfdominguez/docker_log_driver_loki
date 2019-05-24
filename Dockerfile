@@ -7,10 +7,9 @@ WORKDIR /go/src/github.com/lfdominguez/docker_log_driver_loki
 COPY . /go/src/github.com/lfdominguez/docker_log_driver_loki
 
 RUN go get -d -v ./...
-RUN go build --ldflags '-extldflags "-static"' -o /usr/bin/docker-loki-log-driver
-RUN upx /usr/bin/docker-loki-log-driver
+RUN env CGO_ENABLED=0 GOOS=linux go build --ldflags '-s -w -extldflags "-static"' -o /usr/bin/docker_log_driver_loki
+RUN upx /usr/bin/docker_log_driver_loki
 
-FROM alpine
-RUN mkdir -p /run/docker/plugins
-COPY --from=builder /usr/bin/docker-loki-log-driver /docker-loki-log-driver
-CMD ["docker-loki-log-driver"]
+FROM scratch
+COPY --from=builder /usr/bin/docker_log_driver_loki /docker_log_driver_loki
+CMD ["docker_log_driver_loki"]

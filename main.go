@@ -10,7 +10,7 @@ import (
 	"github.com/docker/go-plugins-helpers/sdk"
 )
 
-const socketName = "/run/docker/plugins/logloki.sock"
+const socketName = "logloki"
 
 var logLevels = map[string]logrus.Level{
 	"debug": logrus.DebugLevel,
